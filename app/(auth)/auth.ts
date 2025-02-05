@@ -20,14 +20,41 @@ export const {
   providers: [
     Credentials({
       credentials: {},
+
       async authorize({ email, password }: any) {
+        // Temporary user credentials
+        const tempEmail = 'test@example.com';
+        const tempPassword = 'testpass123';
+
+        // If the provided credentials match the temporary user, return the temp user
+        if (email === tempEmail && password === tempPassword) {
+          return {
+            id: '999',
+            name: 'Test User',
+            email: tempEmail,
+          };
+        }
+
+        // Otherwise, look up the user in your database
         const users = await getUser(email);
         if (users.length === 0) return null;
-        // biome-ignore lint: Forbidden non-null assertion.
+        // Compare the provided password with the stored hashed password
         const passwordsMatch = await compare(password, users[0].password!);
         if (!passwordsMatch) return null;
-        return users[0] as any;
+
+        return users[0] as any; // assume it is single user, The first user object in the array is returned
       },
+
+      // original code: 
+      // async authorize({ email, password }: any) {
+      //   const users = await getUser(email);
+      //   if (users.length === 0) return null;
+      //   // biome-ignore lint: Forbidden non-null assertion.
+      //   const passwordsMatch = await compare(password, users[0].password!);
+      //   if (!passwordsMatch) return null;
+      //   return users[0] as any;
+      // },
+
     }),
   ],
   callbacks: {
@@ -53,3 +80,4 @@ export const {
     },
   },
 });
+
